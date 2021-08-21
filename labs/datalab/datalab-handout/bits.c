@@ -232,7 +232,7 @@ int isLessOrEqual(int x, int y) {
   int negX = (~x)+1;
   int sum = negX + y;
 
-  return !sum;
+  return !((sum&(0x80<<24)));
 }
 //4
 /* 
