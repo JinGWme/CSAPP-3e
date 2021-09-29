@@ -132,7 +132,6 @@ NOTES:
  *      the correct answers.
  */
 
-
 #endif
 //1
 /* 
@@ -142,8 +141,9 @@ NOTES:
  *   Max ops: 14
  *   Rating: 1
  */
-int bitXor(int x, int y) {
-  return (~(x&y))&(~(~x&~y));
+int bitXor(int x, int y)
+{
+  return (~(x & y)) & (~(~x & ~y));
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -151,10 +151,10 @@ int bitXor(int x, int y) {
  *   Max ops: 4
  *   Rating: 1
  */
-int tmin(void) {
+int tmin(void)
+{
 
-  return 0x80<<24;
-
+  return 0x80 << 24;
 }
 //2
 /*
@@ -164,8 +164,9 @@ int tmin(void) {
  *   Max ops: 10
  *   Rating: 1
  */
-int isTmax(int x) {
-  return !((~x)^(x+1)^(!(~x)));
+int isTmax(int x)
+{
+  return !((~x) ^ (x + 1) ^ (!(~x)));
 }
 /* 
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
@@ -175,13 +176,14 @@ int isTmax(int x) {
  *   Max ops: 12
  *   Rating: 2
  */
-int allOddBits(int x) {
+int allOddBits(int x)
+{
   int a1 = x & 0xAA;
-  int a2 = (x>>8)&0xAA;
-  int a3 = (x>>16)&0xAA;
-  int a4 = (x>>24)&0xAA;
+  int a2 = (x >> 8) & 0xAA;
+  int a3 = (x >> 16) & 0xAA;
+  int a4 = (x >> 24) & 0xAA;
 
-  return !((a1 & a2 & a3 & a4)^0xAA);
+  return !((a1 & a2 & a3 & a4) ^ 0xAA);
 }
 /* 
  * negate - return -x 
@@ -190,8 +192,9 @@ int allOddBits(int x) {
  *   Max ops: 5
  *   Rating: 2
  */
-int negate(int x) {
-  return ~x+1;
+int negate(int x)
+{
+  return ~x + 1;
 }
 //3
 /* 
@@ -203,10 +206,11 @@ int negate(int x) {
  *   Max ops: 15
  *   Rating: 3
  */
-int isAsciiDigit(int x) {
-  int a1 = !((x>>3)^0x6);
-  int a2 = !(x^0x38);
-  int a3 = !(x^0x39);
+int isAsciiDigit(int x)
+{
+  int a1 = !((x >> 3) ^ 0x6);
+  int a2 = !(x ^ 0x38);
+  int a3 = !(x ^ 0x39);
   return a1 + a2 + a3;
 }
 /* 
@@ -216,10 +220,11 @@ int isAsciiDigit(int x) {
  *   Max ops: 16
  *   Rating: 3
  */
-int conditional(int x, int y, int z) {
-  x = ((!x)<<31)>>31;
+int conditional(int x, int y, int z)
+{
+  x = ((!x) << 31) >> 31;
 
-  return (x&z)+(~x&y);
+  return (x & z) + (~x & y);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -228,11 +233,20 @@ int conditional(int x, int y, int z) {
  *   Max ops: 24
  *   Rating: 3
  */
-int isLessOrEqual(int x, int y) {
-  int negX = (~x)+1;
-  int sum = negX + y;
-
-  return !((sum&(0x80<<24)));
+int isLessOrEqual(int x, int y)
+{
+  int negX = ~x + 1;                                            //-x
+  int addX = negX + y;                                          //y-x
+  int checkSign = addX >> 31 & 1;                               //y-x的符号
+  int leftBit = 1 << 31;                                        //最大位为1的32位有符号数
+  int xLeft = x & leftBit;                                      //x的符号
+  int yLeft = y & leftBit;                                      //y的符号
+  int bitXor = xLeft ^ yLeft;                                   //x和y符号相同标志位，相同为0不同为1
+  bitXor = (bitXor >> 31) & 1;                                  //符号相同标志位格式化为0或1
+  return ((!bitXor) & (!checkSign)) | (bitXor & (xLeft >> 31)); 
+  //返回1有两种情况：
+  //符号相同标志位为0（相同）位与 y-x 的符号为0（y-x>=0）结果为1；
+  //符号相同标志位为1（不同）位与x的符号位为1（x<0）
 }
 //4
 /* 
@@ -243,13 +257,14 @@ int isLessOrEqual(int x, int y) {
  *   Max ops: 12
  *   Rating: 4 
  */
-int logicalNeg(int x) {
-  x |= x>>16;
-  x |= x>>8;
-  x |= x>>4;
-  x |= x>>2;
-  x |= x>>1;
-  return (x&0x1)^0x1;
+int logicalNeg(int x)
+{
+  x |= x >> 16;
+  x |= x >> 8;
+  x |= x >> 4;
+  x |= x >> 2;
+  x |= x >> 1;
+  return (x & 0x1) ^ 0x1;
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
@@ -263,8 +278,29 @@ int logicalNeg(int x) {
  *  Max ops: 90
  *  Rating: 4
  */
-int howManyBits(int x) {
-  return 0;
+int howManyBits(int x)
+{
+  int b16, b8, b4, b2, b1, b0;
+  int sign = x >> 31;
+  x = (sign & ~x) | (~sign & x); 
+  //如果x为正则不变，否则按位取反（这样好找最高位为1的，原来是最高位为0的，这样也将符号位去掉了）
+
+  // 不断缩小范围
+  //高十六位是否有1
+  b16 = !!(x >> 16) << 4; 
+  //如果有（至少需要16位），则将原数右移16位
+  //如果没有，不右移，下一步就会检查8-16位，以此类推
+  x = x >> b16;           
+  b8 = !!(x >> 8) << 3;   //剩余位高8位是否有1
+  x = x >> b8;            //如果有（至少需要16+8=24位），则右移8位
+  b4 = !!(x >> 4) << 2;   //同理
+  x = x >> b4;
+  b2 = !!(x >> 2) << 1;
+  x = x >> b2;
+  b1 = !!(x >> 1);
+  x = x >> b1;
+  b0 = x;
+  return b16 + b8 + b4 + b2 + b1 + b0 + 1; //+1表示加上符号位
 }
 //float
 /* 
@@ -278,7 +314,8 @@ int howManyBits(int x) {
  *   Max ops: 30
  *   Rating: 4
  */
-unsigned floatScale2(unsigned uf) {
+unsigned floatScale2(unsigned uf)
+{
   return 2;
 }
 /* 
@@ -293,7 +330,8 @@ unsigned floatScale2(unsigned uf) {
  *   Max ops: 30
  *   Rating: 4
  */
-int floatFloat2Int(unsigned uf) {
+int floatFloat2Int(unsigned uf)
+{
   return 2;
 }
 /* 
@@ -309,6 +347,7 @@ int floatFloat2Int(unsigned uf) {
  *   Max ops: 30 
  *   Rating: 4
  */
-unsigned floatPower2(int x) {
-    return 2;
+unsigned floatPower2(int x)
+{
+  return 2;
 }
