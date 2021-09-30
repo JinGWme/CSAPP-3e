@@ -4,5 +4,14 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"makefile.extensionOutputFolder": "./.vscode",
+		"makefile.launchConfigurations": [
+			{
+				"cwd": "/home/jingw/works/CSAPP-3e/labs/malloclab-handout",
+				"binaryPath": "/home/jingw/works/CSAPP-3e/labs/malloclab-handout/mdriver",
+				"binaryArgs": []
+			}
+		]
+	}
 }
