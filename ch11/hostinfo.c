@@ -1,4 +1,5 @@
 /* $begin hostinfo */
+/* 11.4 */
 #include "csapp.h"
 
 int main(int argc, char **argv) 
@@ -24,8 +25,11 @@ int main(int argc, char **argv)
     /* Walk the list and display each IP address */
     flags = NI_NUMERICHOST; /* Display address string instead of domain name */
     for (p = listp; p; p = p->ai_next) {
+        char ip[16];
+        inet_ntop(AF_INET, p->ai_addr, ip, 16);
+        printf("%s\n", ip);
+
         Getnameinfo(p->ai_addr, p->ai_addrlen, buf, MAXLINE, NULL, 0, flags);
-        printf("%s\n", p->ai_canonname);
         printf("%s\n", buf);
     } 
 

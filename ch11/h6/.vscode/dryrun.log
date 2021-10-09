@@ -1,0 +1,5 @@
+make tiny --dry-run --keep-going --print-directory
+make: Entering directory '/home/jingw/works/CSAPP-3e/ch11/h6'
+make: 'tiny' is up to date.
+make: Leaving directory '/home/jingw/works/CSAPP-3e/ch11/h6'
+ 

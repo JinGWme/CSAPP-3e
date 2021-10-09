@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"makefile.launchConfigurations": [
+			{
+				"cwd": "/home/jingw/works/CSAPP-3e/ch11/h6",
+				"binaryPath": "/home/jingw/works/CSAPP-3e/ch11/h6/tiny",
+				"binaryArgs": []
+			}
+		]
+	}
+}
