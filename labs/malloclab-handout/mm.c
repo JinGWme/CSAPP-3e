@@ -111,6 +111,7 @@ static void *coalesce(void *bp)
         PUT(FTRP(NEXT_BLKP(bp)), PACK(size, 0));
         bp = PREV_BLKP(bp);
     }
+    heap_lastp = bp;
     return bp;
     
 }
@@ -302,7 +303,7 @@ void *mm_malloc(size_t size)
         asize = DSIZE * ((size + (DSIZE) + (DSIZE-1)) / DSIZE);
     
     // Search free list for a fit
-    if ((bp = find_first_fit(asize)) != NULL)
+    if ((bp = find_next_fit(asize)) != NULL)
     {
         place(bp, asize);
         if (VERBOSE)
