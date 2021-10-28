@@ -288,11 +288,6 @@ void *mm_malloc(size_t size)
 {
     size_t asize;
     
-    if (VERBOSE)
-    {
-        printf("Request raw size %d \n", size);
-    }
-
     char *bp;
 
     if (size == 0)
@@ -312,7 +307,7 @@ void *mm_malloc(size_t size)
         place(bp, asize);
         if (VERBOSE)
         {
-            printf("Alloc at %p raw size %d \n", HDRP(bp), size);
+            printf("Alloc at %p size %d \n", HDRP(bp), GET_SIZE(HDRP(bp)));
         }
         heap_walker();
         return bp;
@@ -325,7 +320,7 @@ void *mm_malloc(size_t size)
     place(bp, asize);
     if (VERBOSE)
     {
-        printf("Alloc at %p raw size %d after extending heap.\n", HDRP(bp), size);
+        printf("Alloc at %p size %d after extending heap.\n", HDRP(bp), GET_SIZE(HDRP(bp)));
     }
     heap_walker();
     return bp;
@@ -358,30 +353,39 @@ void *mm_realloc(void *ptr, size_t size)
     void *oldptr = ptr;
     void *newptr;
     size_t copySize;
-
-    int next_alloced = GET_ALLOC(HDRP(NEXT_BLKP(ptr)));
-    if (!next_alloced)
+    if (VERBOSE)
     {
-        size_t this_size = GET_SIZE(HDRP(ptr));            // DSIZE aligned
-        size_t next_size = GET_SIZE(HDRP(NEXT_BLKP(ptr))); // DSIZE aligned
-        size_t merge_size = this_size + next_size;
-        if(merge_size - DSIZE >= size) // enough space, merge
-        {
-            PUT(HDRP(ptr), PACK(merge_size, 1));
-            PUT(FTRP(ptr), PACK(merge_size, 1));
-            return ptr;
-        }
-    }    
+        printf("Realloc start from %p size %d \n", HDRP(oldptr),GET_SIZE(HDRP(oldptr)));
+    }
+
+    // int next_alloced = GET_ALLOC(HDRP(NEXT_BLKP(ptr)));
+    // if (!next_alloced)
+    // {
+    //     size_t this_size = GET_SIZE(HDRP(ptr));            // DSIZE aligned
+    //     size_t next_size = GET_SIZE(HDRP(NEXT_BLKP(ptr))); // DSIZE aligned
+    //     size_t merge_size = this_size + next_size;
+    //     if(merge_size - DSIZE >= size) // enough space, merge
+    //     {
+    //         PUT(HDRP(ptr), PACK(merge_size, 1));
+    //         PUT(FTRP(ptr), PACK(merge_size, 1));
+    //         return ptr;
+    //     }
+    // }    
     
     // can't merge in place, we malloc and copy
     newptr = mm_malloc(size);
     if (newptr == NULL)
       return NULL;
-    copySize = *(size_t *)((char *)oldptr - SIZE_T_SIZE);
+    copySize = HDRP(oldptr)-DSIZE;
+    // copySize = *(size_t *)((char *)oldptr - SIZE_T_SIZE);
     if (size < copySize)
-      copySize = size;
+       copySize = size;
     memcpy(newptr, oldptr, copySize);
     mm_free(oldptr);
+    if (VERBOSE)
+    {
+        printf("Realloc end from %p size %d, data copied %d \n", HDRP(newptr),GET_SIZE(HDRP(newptr)), copySize);
+    }
     return newptr;
 }
 
